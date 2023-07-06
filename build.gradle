@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+group 'org.phoenixx'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // Used for emulating the browser requests
+    implementation('org.seleniumhq.selenium:selenium-java:4.10.0')
+
+    // Open-AI
+    // https://mvnrepository.com/artifact/com.theokanning.openai-gpt3-java/api
+    implementation group: 'com.theokanning.openai-gpt3-java', name: 'api', version: '0.14.0'
+
+    // Used for parsing HTML
+    // https://mvnrepository.com/artifact/org.jsoup/jsoup
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.16.1'
+}
+
+test {
+    useJUnitPlatform()
+}
