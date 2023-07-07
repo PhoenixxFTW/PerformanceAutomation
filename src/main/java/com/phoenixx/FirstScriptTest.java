@@ -6,15 +6,16 @@ package com.phoenixx;
  * @since 12:43 PM [30-06-2023]
  */
 
+import org.checkerframework.checker.units.qual.C;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -38,7 +39,7 @@ public class FirstScriptTest {
 
     private static int currentIndex = 0;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
 /*
         String html = "<p>Para one</p><p>Para <b>two keyword</b></p>";
@@ -53,6 +54,8 @@ public class FirstScriptTest {
 
         //TODO Read in webpage source, and simply / remove all HTML tags and leave the rendered text only. Then let GPT read that in and create a selenium call
 
+        ChromeOptions options = new ChromeOptions();
+        options.setCapability(CapabilityType.UNHANDLED_PROMPT_BEHAVIOUR, UnexpectedAlertBehaviour.ACCEPT);
         WebDriver driver = new ChromeDriver();
         driver.get("https://github.com/PhoenixxFTW");
 
@@ -61,6 +64,9 @@ public class FirstScriptTest {
 
             // Convert the page source into our tag map
             convertToMap(pageSource, false);
+
+            // This is required sometimes, not even sure why
+            //driver.navigate().refresh();
 
             boolean success = false;
             int limit = 0;
@@ -73,11 +79,18 @@ public class FirstScriptTest {
                     // Find the clickable element with the given name
                     WebElement element = getTagFromName(clickOnElement);
 
-                    element.click();
+                    if(element != null) {
+                        element.click();
+                        success = true;
+                        System.out.println("Successfully clicked element: " + clickOnElement);
+                    } else {
+                        System.out.println("Could not match element with text: " + clickOnElement);
+                        limit++;
 
-                    success = true;
+                    }
                 } catch (Exception e) {
                     System.out.println("Failure while retrieving intractable element, calling again...");
+                    e.printStackTrace();
 
                     success = false;
                     limit++;
