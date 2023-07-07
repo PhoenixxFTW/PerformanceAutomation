@@ -31,6 +31,8 @@ public class FirstScriptTest {
     // HashMap to store tags and their corresponding data
     private final static Map<String, List<String>> tagDataMap = new HashMap<>();
 
+    private final static List<WebElement> currentElements = new ArrayList<>();
+
     private static int currentIndex = 0;
 
     public static void main(String[] args) {
@@ -56,89 +58,89 @@ public class FirstScriptTest {
        // System.out.println("Source: " + driver.getPageSource());
 
         String pageSource = driver.getPageSource();
-        String allVisualStrings = Jsoup.parse(pageSource).text();
 
         // Convert the page source into our tag map
         convertToMap(pageSource, false);
 
-        // The button the client should find and click on
-        String clickedOnTag = getTagFromName(clickOnElement);
+        retrieveAllInteractables(driver, false);
 
-        // The element found, and clicked
-        WebElement element = driver.findElement(By.xpath("//" + clickedOnTag + "[text()=\"" + clickOnElement + "\"]"));
+        // Find the clickable element with the given name
+        WebElement element = getTagFromName(clickOnElement);
         element.click();
 
-        // New page source after clicking
-        pageSource = driver.getPageSource();
+        // This is required sometimes, not even sure why
+        driver.navigate().refresh();
+        retrieveAllInteractables(driver, true);
 
-        // Convert new page source to map
-        convertToMap(pageSource, true);
+        clickOnElement = "Actions";
+/*
+        // Find the clickable element with the given name
+        element = getTagFromName(clickOnElement);
+        element.click();*/
 
-        // Click on "Issues" element
-        clickOnElement = "Pull Requests";
 
-        boolean success = false;
-
-        while (!success && currentIndex < tagDataMap.values().size()) {
-            try {
-                clickedOnTag = getTagFromName(clickOnElement);
-
-                // The element found, and clicked
-                //element = driver.findElement(By.xpath("//" + clickedOnTag + "[text()=\"" + clickOnElement + "\"]"));
-                element = new WebDriverWait(driver, Duration.ofMillis(1000)).until(ExpectedConditions.elementToBeClickable(By.xpath("//" + clickedOnTag + "[text()=\"" + clickOnElement + "\"]")));
-
-                System.out.println("ELEMENT: " + element.getAccessibleName() + " , " + element.getTagName() + ", " + element.getText());
-
-                element.click();
-            } catch (Exception e) {
-
-                System.out.println("Failed to click element: '" + clickOnElement + "' with tag: '" + clickedOnTag + "' INDEX: " + currentIndex);
-
-                // If the click failed, means we're on the wrong element, so we increment the counter and do the request again
-                currentIndex++;
-            } finally {
-
-            }
-        }
-
-        if(success) {
-            System.out.println("FOUND ELEMENT AT INDEX: " + currentIndex);
-            currentIndex = 0;
-        } else {
-            System.out.println("FAILURE @@@@@@@@@@@@@@@@@@@@@@@@");
-            return;
-        }
-
-     /*   System.out.println("Element: " + element);
-        System.out.println("JSOUP: " + (jsoupToXpath(element)));
-        System.out.println("JSOUP 2: " + (getXPath(element)));
-
-        System.out.println("CLEAN HTML: " + allVisualStrings);
-
-        List<String> texts = new ArrayList<>();
-
-        Element body = document.body();
-        body.forEach(element1 -> {
-            for (TextNode textNode : element1.textNodes()) {
-                String text = textNode.getWholeText().trim();
-                if (!text.isEmpty()) {
-                    texts.add(text);
-                }
-            }
-        });
-
-        System.out.println("ALL TITLES: " + texts);
-
-        driver.findElement(By.xpath(getXPath(element))).click();
-        //driver.findElement(By.xpath("//span[@title=\"Hydra\"]")
-        String title = driver.getTitle();
-        //System.out.println("Title: " + title);
-*/
         //driver.quit();
     }
 
-    public static String getTagFromName(String name) {
-        int counter = 0;
+    public static void retrieveAllInteractables(WebDriver driver, boolean print) {
+        System.out.println("----------------------");
+
+        List<String> clickableTexts = new ArrayList<>();
+
+        currentElements.clear();
+
+        // Fetch and process button elements
+        List<WebElement> buttons = driver.findElements(By.tagName("button"));
+        currentElements.addAll(buttons);
+        System.out.println("BUTTON SIZE: " + buttons.size());
+        if(print) {
+            for (WebElement button : buttons) {
+                String text = button.getText();
+                if (!text.trim().isEmpty()) {
+                    clickableTexts.add("BUTTON: " + text);
+                }
+            }
+        }
+
+        // Fetch and process link elements
+        List<WebElement> links = driver.findElements(By.tagName("a"));
+        currentElements.addAll(links);
+        System.out.println("links ELEM SIZE: " + links.size());
+        if(print) {
+            for (WebElement link : links) {
+                String text = link.getText();
+                if (!text.trim().isEmpty()) {
+                    clickableTexts.add("links: " + text);
+                }
+            }
+        }
+
+        // Fetch and process elements with onclick attribute
+        List<WebElement> onClickElems = driver.findElements(By.xpath("//*[@onclick]"));
+        currentElements.addAll(onClickElems);
+        System.out.println("CLICK ELEM SIZE: " + onClickElems.size());
+        if(print) {
+            for (WebElement elem : onClickElems) {
+                String text = elem.getText();
+                if (!text.trim().isEmpty()) {
+                    clickableTexts.add("onClickElems: " + text);
+                }
+            }
+        }
+
+        // Print all clickable texts
+        for (String text : clickableTexts) {
+            System.out.println(text);
+        }
+    }
+
+    public static WebElement getTagFromName(String name) {
+        for(WebElement element: currentElements) {
+            if(element.getText().equalsIgnoreCase(name)) {
+                return element;
+            }
+        }
+        /*int counter = 0;
         for(String tag: tagDataMap.keySet()) {
             if(counter >= currentIndex) {
                 for (String val : tagDataMap.get(tag)) {
@@ -148,8 +150,8 @@ public class FirstScriptTest {
                 }
             }
             counter++;
-        }
-        return "";
+        }*/
+        return null;
     }
 
     public static void convertToMap(String pageSource, boolean print) {
