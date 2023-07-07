@@ -24,8 +24,11 @@ import java.util.*;
 public class FirstScriptTest {
 
     private final static List<String> Steps = new ArrayList<>(Arrays.asList(
-            "Click Hydra",
-            "abc"
+            "Hydra",
+            "src",
+            "main",
+            "java/com/phoenixx",
+            "HydraApp.java"
     ));
 
     // HashMap to store tags and their corresponding data
@@ -50,34 +53,41 @@ public class FirstScriptTest {
 
         //TODO Read in webpage source, and simply / remove all HTML tags and leave the rendered text only. Then let GPT read that in and create a selenium call
 
-        String clickOnElement = "Hydra";
-
         WebDriver driver = new ChromeDriver();
         driver.get("https://github.com/PhoenixxFTW");
 
-       // System.out.println("Source: " + driver.getPageSource());
+        for(String clickOnElement: Steps) {
+            String pageSource = driver.getPageSource();
 
-        String pageSource = driver.getPageSource();
+            // Convert the page source into our tag map
+            convertToMap(pageSource, false);
 
-        // Convert the page source into our tag map
-        convertToMap(pageSource, false);
+            boolean success = false;
+            int limit = 0;
+            while(!success && limit < 5) {
+                try {
+                    //driver.navigate().refresh();
 
-        retrieveAllInteractables(driver, false);
+                    retrieveAllInteractables(driver, true);
 
-        // Find the clickable element with the given name
-        WebElement element = getTagFromName(clickOnElement);
-        element.click();
+                    // Find the clickable element with the given name
+                    WebElement element = getTagFromName(clickOnElement);
 
-        // This is required sometimes, not even sure why
-        driver.navigate().refresh();
-        retrieveAllInteractables(driver, true);
+                    element.click();
 
-        clickOnElement = "Actions";
-/*
-        // Find the clickable element with the given name
-        element = getTagFromName(clickOnElement);
-        element.click();*/
+                    success = true;
+                } catch (Exception e) {
+                    System.out.println("Failure while retrieving intractable element, calling again...");
 
+                    success = false;
+                    limit++;
+
+                    // This is required sometimes, not even sure why
+                    driver.navigate().refresh();
+                }
+
+            }
+        }
 
         //driver.quit();
     }
@@ -93,7 +103,7 @@ public class FirstScriptTest {
         List<WebElement> buttons = driver.findElements(By.tagName("button"));
         currentElements.addAll(buttons);
         System.out.println("BUTTON SIZE: " + buttons.size());
-        if(print) {
+        if (print) {
             for (WebElement button : buttons) {
                 String text = button.getText();
                 if (!text.trim().isEmpty()) {
@@ -106,7 +116,7 @@ public class FirstScriptTest {
         List<WebElement> links = driver.findElements(By.tagName("a"));
         currentElements.addAll(links);
         System.out.println("links ELEM SIZE: " + links.size());
-        if(print) {
+        if (print) {
             for (WebElement link : links) {
                 String text = link.getText();
                 if (!text.trim().isEmpty()) {
@@ -119,7 +129,7 @@ public class FirstScriptTest {
         List<WebElement> onClickElems = driver.findElements(By.xpath("//*[@onclick]"));
         currentElements.addAll(onClickElems);
         System.out.println("CLICK ELEM SIZE: " + onClickElems.size());
-        if(print) {
+        if (print) {
             for (WebElement elem : onClickElems) {
                 String text = elem.getText();
                 if (!text.trim().isEmpty()) {
@@ -132,6 +142,8 @@ public class FirstScriptTest {
         for (String text : clickableTexts) {
             System.out.println(text);
         }
+
+
     }
 
     public static WebElement getTagFromName(String name) {
