@@ -25,11 +25,8 @@ import java.util.*;
 public class FirstScriptTest {
 
     private final static List<String> Steps = new ArrayList<>(Arrays.asList(
-            "Hydra",
-            "src",
-            "main",
-            "java/com/phoenixx",
-            "HydraApp.java"
+            "Achievements",
+            "Overview"
     ));
 
     // HashMap to store tags and their corresponding data
@@ -100,6 +97,10 @@ public class FirstScriptTest {
                 }
 
             }
+            if(!success) {
+                System.out.println("Complete failure! Unable to click on: " + clickOnElement + " and could not continue further.");
+                break;
+            }
         }
 
         //driver.quit();
@@ -159,8 +160,10 @@ public class FirstScriptTest {
 
     }
 
+    //TODO We could use Levenshtein Distance algorithm to see how close of a match the name and element are, then retrieve the highest distance value
     public static WebElement getTagFromName(String name) {
         for(WebElement element: currentElements) {
+            System.out.println("Comparing element: '" + element.getText() + "' and name: '" + name + "'");
             if(element.getText().equalsIgnoreCase(name)) {
                 return element;
             }
