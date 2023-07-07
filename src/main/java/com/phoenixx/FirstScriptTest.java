@@ -38,17 +38,6 @@ public class FirstScriptTest {
 
     public static void main(String[] args) throws InterruptedException {
 
-/*
-        String html = "<p>Para one</p><p>Para <b>two keyword</b></p>";
-        Document doc = Jsoup.parse(html);
-
-        Element el = doc.select(":containsOwn(keyword)").first();
-        Element p = doc.select("p:contains(keyword)").first();
-
-        System.out.println(el.html());
-        System.out.println(p.html());
-*/
-
         //TODO Read in webpage source, and simply / remove all HTML tags and leave the rendered text only. Then let GPT read that in and create a selenium call
 
         ChromeOptions options = new ChromeOptions();
